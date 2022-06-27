@@ -1,0 +1,85 @@
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <signal.h>
+#include <string>
+#include <map>
+#include <linux/limits.h>
+using namespace std;
+
+//UNIX Final exam question 2
+int main(int argc, char *argv[])
+{
+	if (argc < 2)
+	{
+		cout << "List commands as command line arguments";
+		exit(0);
+	}
+	map<pid_t, string> pidToString;
+	int arguments = (argc - 1);
+	char path[PATH_MAX];
+	int i = 0; //might need this later
+	for (; i < arguments; i++)
+	{
+		pid_t pid = fork();
+		if (pid == -1)
+		{
+			cout << "Fork error";
+			exit(0);
+		}
+		else
+		{
+			FILE *fp = popen(argv[i + 1], "r");
+			while (fgets(path, PATH_MAX, fp) != NULL)
+			{
+				cout << path << endl;
+			}
+			pidToString[pid] = argv[i + 1];
+		}
+	}
+	int totalExited = 0;
+
+	while (totalExited < arguments)
+	{
+		int status;
+		pid_t cpid = wait(&status);
+		if (WIFEXITED(status))
+		{
+			if (WIFEXITED(status) != 0)
+			{
+				cerr << "Proc " << pidToString[cpid] << " exited with status" << WEXITSTATUS(status) << endl;
+			}
+		}
+		else
+		{
+			cerr << "Proc " << pidToString[cpid] << " exited with an error with status" << WEXITSTATUS(status) << endl;
+			pidToString.erase(cpid);
+		}
+		totalExited++;
+
+		if (i < arguments)
+		{
+			i++;
+			pid_t pid = fork();
+			if (pid == -1)
+			{
+				cout << "Fork error";
+				exit(0);
+			}
+			else
+			{
+				FILE *fp = popen(argv[i + 1], "r");
+				while (fgets(path, PATH_MAX, fp) != NULL)
+				{
+					cout << path << endl;
+				}
+				pidToString[pid] = argv[i + 1];
+			}
+		}
+	}
+}
