@@ -1,0 +1,39 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+int main()
+{
+	string fileName;
+	string line;
+	string buffer[10];
+
+	ifstream inFile;
+	cout<<"Enter file name: ";
+	cin >> fileName;
+	inFile.open(fileName);
+
+	ifstream infile(fileName);
+	const size_t size = sizeof buffer / sizeof *buffer;
+	size_t i = 0;
+
+    while (getline(infile, line))
+    {
+       buffer[i] = line;
+       if (i++ >= size)
+       {
+          i = 0;
+       }
+    }
+
+    for (size_t j = 0; j < size; j++)
+    {
+       cout << buffer[j] << "\n";
+       if (j++ >= size)
+       {
+          j = 0;
+       }
+    }
+    return 0;
+}
