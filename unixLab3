@@ -1,0 +1,24 @@
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+
+int main()
+{
+	struct tm* westernTime;
+	time_t localTime;
+
+	time(&localTime);
+	westernTime = localtime(&localTime);
+
+	if (putenv(const_cast<char*>("TZ=US/Pacific")) == -1)
+	{
+		cout << "Error\n";
+		exit(1);
+	}
+
+	time(&localTime);
+	westernTime = localtime(&localTime);
+
+	cout << "California date and time is: " << asctime(westernTime) << "\n";
+}
